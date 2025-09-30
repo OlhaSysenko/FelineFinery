@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FelineFinery - Інтернет-магазин шкіряних виробів</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.2); }
+    .transition-smooth { transition: all 0.3s ease-in-out; }
+    .modal-bg { background-color: rgba(0,0,0,0.5); }
+    .messenger-icon { margin-left: 8px; cursor: pointer; transition: all 0.2s ease-in-out; }
+    .messenger-icon:hover { transform: scale(1.2); }
+    .telegram-icon { width: 28px; height: 28px; }
+    .viber-icon { width: 32px; height: 32px; }
+    .whatsapp-icon { width: 36px; height: 36px; }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+<!-- Header -->
+<header class="bg-amber-50 shadow-md sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
+
+    <!-- Назва по середині вертикалі -->
+    <div class="text-5xl font-bold text-amber-800 self-center flex items-center">
+      <span class="mr-2 inline-block">🐾</span>
+      FelineFinery
+      <span class="ml-2 inline-block transform scale-x-[-1]">🐾</span>
+    </div>
+  
+
+    <!-- Контакти та меню справа -->
+    <div class="flex flex-col items-end space-y-1">
+      <div class="flex items-center space-x-2">
+        <span>+380123456789</span>
+        <a href="https://t.me/yourusername" target="_blank">
+          <img class="messenger-icon telegram-icon" src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram">
+        </a>
+        <a href="viber://chat?number=%2B380123456789" target="_blank">
+          <img class="messenger-icon viber-icon" src="https://pngimg.com/uploads/viber/viber_PNG11.png" alt="Viber">
+        </a>
+        <a href="https://wa.me/380123456789" target="_blank">
+          <img class="messenger-icon whatsapp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+        </a>
+      </div>
+
+      <!-- Меню -->
+      <nav class="flex space-x-4">
+        <a href="#catalog" id="menuCatalog" class="text-gray-700 hover:text-amber-700 font-bold text-2xl">Каталог</a>
+        <a href="#about" id="menuAbout" class="text-gray-700 hover:text-amber-700 font-bold text-2xl">Про нас</a>
+        <a href="#" id="cartBtn" class="text-gray-700 hover:text-amber-700 font-bold text-2xl">Кошик (<span id="cartCount">0</span>)</a>
+      </nav>
+
+      <!-- Мова -->
+      <div class="mt-1">
+        <button onclick="switchLang('uk')" class="px-2 py-1 border rounded">UA</button>
+        <button onclick="switchLang('en')" class="px-2 py-1 border rounded">EN</button>
+      </div>
+    </div>
+
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="bg-white py-16">
+  <div class="max-w-7xl mx-auto px-4 text-center">
+    <h1 id="heroTitle" class="text-3xl md:text-4xl font-serif mb-4 text-amber-900">
+      Натуральна шкіра. Українська майстерність.
+    </h1>    
+    <p id="heroDesc" class="text-gray-700 mb-6 text-lg">
+      Сумки, рюкзаки, гаманці та ремені ручної роботи від Кота — якість, що живе довго.
+    </p>
+    <a href="#catalog" id="heroBtn" class="px-6 py-3 bg-amber-700 text-white rounded-md hover:bg-amber-800 transition-smooth">
+      Переглянути каталог
+    </a>
+  </div>
+</section>
+
+<!-- Categories + Sorting -->
+<section class="max-w-7xl mx-auto px-4 py-8 flex flex-wrap justify-between items-center">
+  <div id="categoryButtons" class="flex gap-2 flex-wrap mb-2"></div>
+  <div>
+    <select id="sortSelect" class="px-4 py-2 border rounded hover:bg-amber-50 transition-smooth" onchange="applySorting()"></select>
+  </div>
+</section>
+
+<!-- Catalog -->
+<section id="catalog" class="max-w-7xl mx-auto px-4 py-8">
+  <h2 id="catalogTitle" class="text-2xl font-semibold mb-4 text-amber-900">Каталог товарів</h2>
+  <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+</section>
+
+<!-- About -->
+<section id="about" class="max-w-7xl mx-auto px-4 py-12">
+  <h2 id="aboutTitle" class="text-2xl font-semibold mb-4 text-amber-900">Про нас</h2>
+  <p id="aboutDesc" class="text-gray-700 text-lg">
+    Відкрийте світ натуральної шкіри разом з FelineFinery! Наші сумки, рюкзаки та гаманці — це не просто аксесуари, це історія майстерності, стилю та довговічності. Кожен виріб створений вручну з любов’ю та увагою до деталей, у єдиному екземплярі, щоб підкреслити вашу індивідуальність і зробити ваш образ неповторним.
+  </p>
+</section>
+
+<!-- Footer -->
+<footer class="bg-white border-t mt-12">
+  <div class="max-w-7xl mx-auto px-4 py-6 text-sm text-gray-600 flex justify-center items-center space-x-4">
+    <span>+380123456789</span>
+    <a href="https://t.me/yourusername" target="_blank">
+      <img class="messenger-icon telegram-icon" src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram">
+    </a>
+    <a href="viber://chat?number=%2B380123456789" target="_blank">
+      <img class="messenger-icon viber-icon" src="https://pngimg.com/uploads/viber/viber_PNG11.png" alt="Viber">
+    </a>
+    <a href="https://wa.me/380123456789" target="_blank">
+      <img class="messenger-icon whatsapp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
+    </a>
+  </div>
+</footer>
+
+<!-- Cart Modal -->
+<div id="cartModal" class="fixed inset-0 modal-bg flex justify-center items-center hidden z-50">
+  <div class="bg-white w-96 p-6 rounded-lg transition-smooth">
+    <h3 id="cartTitle" class="text-lg font-semibold mb-4">Кошик</h3>
+    <ul id="cartItems" class="space-y-2 max-h-64 overflow-y-auto mb-4"></ul>
+    <div class="flex justify-between mb-4 font-medium">
+      <span id="cartTotalLabel">Загалом:</span>
+      <span id="cartTotal">0 €</span>
+    </div>
+    <div class="flex justify-between">
+      <button id="checkoutBtn" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-smooth">Оформити замовлення</button>
+      <button id="closeCartBtn" class="px-4 py-2 bg-amber-700 text-white rounded hover:bg-amber-800 transition-smooth">Закрити</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const translations = {
+  uk: {
+    menu: { catalog: 'Каталог', about: 'Про нас', cart: 'Кошик' },
+    hero: { title: 'Натуральна шкіра. Українська майстерність.', desc: 'Сумки, рюкзаки, гаманці та ремені ручної роботи від Кота — якість, що живе довго.', btn: 'Переглянути каталог' },
+    catalogTitle: 'Каталог товарів',
+    aboutTitle: 'Про нас',
+    aboutDesc: 'Відкрийте світ натуральної шкіри разом з FelineFinery! Наші сумки, рюкзаки та гаманці — це не просто аксесуари, це історія майстерності, стилю та довговічності. Кожен виріб створений вручну з любов’ю та увагою до деталей, у єдиному екземплярі, щоб підкреслити вашу індивідуальність і зробити ваш образ неповторним.',
+    cartTitle: 'Кошик',
+    cartTotal: 'Загалом:',
+    checkoutBtn: 'Оформити замовлення',
+    closeBtn: 'Закрити',
+    addBtn: 'Додати',
+    categories: ['Сумки','Рюкзаки','Гаманці','Ремені','Аксесуари','Усі'],
+    sortOptions: ['Сортування','Назва: А→Я','Назва: Я→А','Ціна: зростання','Ціна: спадання']
+  },
+  en: {
+    menu: { catalog: 'Catalog', about: 'About', cart: 'Cart' },
+    hero: { title: 'Genuine Leather. Ukrainian Craftsmanship.', desc: 'Bags, backpacks, wallets, and belts by the Cat — quality that lasts.', btn: 'View Catalog' },
+    catalogTitle: 'Product Catalog',
+    aboutTitle: 'About Us',
+    aboutDesc: 'Discover the world of genuine leather with FelineFinery! Our bags, backpacks, and wallets are not just accessories; they tell a story of craftsmanship, style, and durability. Each piece is handmade with love and attention to detail, highlighting your individuality and making your look unique.',
+    cartTitle: 'Cart',
+    cartTotal: 'Total:',
+    checkoutBtn: 'Checkout',
+    closeBtn: 'Close',
+    addBtn: 'Add',
+    categories: ['Bags','Backpacks','Wallets','Belts','Accessories','All'],
+    sortOptions: ['Sort','Name: A→Z','Name: Z→A','Price: Low→High','Price: High→Low']
+  }
+};
+
+let currentLang = 'uk';
+
+const products = [
+  {id:1,title:{uk:"Сумка 'Kiev'",en:"Bag 'Kiev'"},category:{uk:"Сумки",en:"Bags"},price:129,img:["https://images.unsplash.com/photo-1606813909396-3dfc6783e6a7?auto=format&fit=crop&w=400&q=80"],desc:{uk:"Елегантна шкіряна сумка, ручна робота, ідеальна для щоденного використання.",en:"Elegant leather bag, handmade, perfect for daily use."}},
+  {id:2,title:{uk:"Рюкзак 'Traveler'",en:"Backpack 'Traveler'"},category:{uk:"Рюкзаки",en:"Backpacks"},price:179,img:["https://images.unsplash.com/photo-1560807707-8cc77767d783?auto=format&fit=crop&w=400&q=80"],desc:{uk:"Міцний рюкзак з натуральної шкіри для подорожей та щоденних пригод.",en:"Durable leather backpack for travel and daily adventures."}},
+  {id:3,title:{uk:"Гаманець 'Classic'",en:"Wallet 'Classic'"},category:{uk:"Гаманці",en:"Wallets"},price:49,img:["https://images.unsplash.com/photo-1593032457863-6f95d3c1b267?auto=format&fit=crop&w=400&q=80"],desc:{uk:"Компактний гаманець для зберігання карток та готівки.",en:"Compact wallet for cards and cash."}},
+  {id:4,title:{uk:"Ремінь 'Heritage'",en:"Belt 'Heritage'"},category:{uk:"Ремені",en:"Belts"},price:39,img:["https://images.unsplash.com/photo-1588694894517-c6de28e3e6cf?auto=format&fit=crop&w=400&q=80"],desc:{uk:"Стильний ремінь з натуральної шкіри, підходить до будь-якого образу.",en:"Stylish leather belt suitable for any outfit."}}
+];
+
+let cart = [];
+let currentCategory = '';
+
+function switchLang(lang){
+  currentLang = lang;
+  document.getElementById('menuCatalog').textContent = translations[lang].menu.catalog;
+  document.getElementById('menuAbout').textContent = translations[lang].menu.about;
+  document.getElementById('cartBtn').innerHTML = `${translations[lang].menu.cart} (<span id="cartCount">${cart.reduce((s,i)=>s+i.qty||0,0)}</span>)`;
+  document.getElementById('heroTitle').textContent = translations[lang].hero.title;
+  document.getElementById('heroDesc').textContent = translations[lang].hero.desc;
+  document.getElementById('heroBtn').textContent = translations[lang].hero.btn;
+  document.getElementById('catalogTitle').textContent = translations[lang].catalogTitle;
+  document.getElementById('aboutTitle').textContent = translations[lang].aboutTitle;
+  document.getElementById('aboutDesc').textContent = translations[lang].aboutDesc;
+  document.getElementById('cartTitle').textContent = translations[lang].cartTitle;
+  document.getElementById('cartTotalLabel').textContent = translations[lang].cartTotal;
+  document.getElementById('checkoutBtn').textContent = translations[lang].checkoutBtn;
+  document.getElementById('closeCartBtn').textContent = translations[lang].closeBtn;
+  renderCategories();
+  renderSortOptions();
+  renderProducts(getFilteredProducts());
+}
+
+// Categories
+function renderCategories(){
+  const container = document.getElementById('categoryButtons');
+  container.innerHTML='';
+  translations[currentLang].categories.forEach((c,i)=>{
+    const btn = document.createElement('button');
+    btn.className='px-4 py-2 border rounded hover:bg-amber-50 transition-smooth';
+    btn.textContent = c;
+    btn.onclick = ()=>{ currentCategory = i===translations[currentLang].categories.length-1 ? '' : c; renderProducts(getFilteredProducts()); };
+    container.appendChild(btn);
+  });
+}
+
+// Sorting
+function renderSortOptions(){
+  const select = document.getElementById('sortSelect');
+  select.innerHTML='';
+  translations[currentLang].sortOptions.forEach((opt,i)=>{
+    const option = document.createElement('option');
+    option.value = i===0?'':['nameAsc','nameDesc','priceAsc','priceDesc'][i-1] || '';
+    option.textContent = opt;
+    select.appendChild(option);
+  });
+}
+
+function applySorting(){ renderProducts(getFilteredProducts()); }
+
+// Products
+function getFilteredProducts(){
+  let list = currentCategory ? products.filter(p=>p.category[currentLang]===currentCategory) : [...products];
+  const sort = document.getElementById('sortSelect').value;
+  if(sort==='nameAsc') list.sort((a,b)=>a.title[currentLang].localeCompare(b.title[currentLang]));
+  else if(sort==='nameDesc') list.sort((a,b)=>b.title[currentLang].localeCompare(a.title[currentLang]));
+  else if(sort==='priceAsc') list.sort((a,b)=>a.price-b.price);
+  else if(sort==='priceDesc') list.sort((a,b)=>b.price-a.price);
+  return list;
+}
+
+function renderProducts(list){
+  const grid = document.getElementById('productGrid');
+  grid.innerHTML='';
+  list.forEach(p=>{
+    const card = document.createElement('div');
+    card.className='border rounded p-2 bg-white flex flex-col product-card transition-smooth';
+    const img = document.createElement('img');
+    img.src=p.img[0]; img.alt=p.title[currentLang];
+    img.className='w-full h-48 object-cover rounded mb-2 cursor-pointer';
+    img.addEventListener('click',()=>showProductModal(p.id));
+
+    const title = document.createElement('h3');
+    title.className='font-medium mb-1 text-amber-800';
+    title.textContent=p.title[currentLang];
+
+    const category = document.createElement('div');
+    category.className='text-gray-600 mb-2';
+    category.textContent=p.category[currentLang];
+
+    const footer = document.createElement('div');
+    footer.className='flex justify-between items-center';
+    const price = document.createElement('span');
+    price.className='font-semibold'; price.textContent=p.price+' €';
+    const addBtn = document.createElement('button');
+    addBtn.className='px-2 py-1 bg-amber-700 text-white rounded hover:bg-amber-800 transition-smooth';
+    addBtn.textContent=translations[currentLang].addBtn;
+    addBtn.addEventListener('click',()=>addToCart(p.id));
+    footer.appendChild(price); footer.appendChild(addBtn);
+
+    card.appendChild(img); card.appendChild(title); card.appendChild(category); card.appendChild(footer);
+    grid.appendChild(card);
+  });
+}
+
+// Cart
+function addToCart(id){
+  const item = products.find(p=>p.id===id);
+  const found = cart.find(c=>c.id===id);
+  if(found) found.qty++; else cart.push({...item,qty:1});
+  updateCartCount();
+}
+function updateCartCount(){
+  document.getElementById('cartCount').textContent=cart.reduce((sum,i)=>sum+i.qty,0);
+}
+
+const cartModal = document.getElementById('cartModal');
+const cartItems = document.getElementById('cartItems');
+document.getElementById('cartBtn').addEventListener('click',()=>{
+  cartItems.innerHTML='';
+  cart.forEach(i=>{
+    const li = document.createElement('li');
+    li.className='flex justify-between items-center';
+    li.innerHTML=`${i.title[currentLang]} x${i.qty} - ${i.price*i.qty} €`;
+    const removeBtn = document.createElement('button');
+    removeBtn.className='text-red-600 ml-2';
+    removeBtn.textContent='x';
+    removeBtn.addEventListener('click',()=>removeFromCart(i.id));
+    li.appendChild(removeBtn);
+    cartItems.appendChild(li);
+  });
+  document.getElementById('cartTotal').textContent=cart.reduce((sum,i)=>sum+i.price*i.qty,0)+' €';
+  cartModal.classList.remove('hidden');
+});
+
+document.getElementById('closeCartBtn').addEventListener('click',()=>cartModal.classList.add('hidden'));
+document.getElementById('checkoutBtn').addEventListener('click',()=>alert(translations[currentLang].checkoutBtn+' functionality will be implemented later'));
+
+function removeFromCart(id){
+  cart=cart.filter(c=>c.id!==id);
+  updateCartCount();
+  document.getElementById('cartBtn').click();
+}
+
+// Product modal
+function showProductModal(id){
+  const product = products.find(p=>p.id===id);
+  const modal = document.createElement('div');
+  modal.className='fixed inset-0 modal-bg flex justify-center items-center z-50';
+  modal.innerHTML=`
+    <div class='bg-white max-w-lg w-full p-6 rounded-lg relative'>
+      <button class='absolute top-2 right-2 text-red-600 text-xl font-bold'>&times;</button>
+      <h3 class='text-xl font-semibold mb-4 text-amber-800'>${product.title[currentLang]}</h3>
+      <div class='grid grid-cols-2 gap-2 mb-4'>
+        ${product.img.map(i=>`<img src='${i}' class='w-full h-32 object-cover rounded'>`).join('')}
+      </div>
+      <p class='text-gray-700 mb-2'>${product.desc[currentLang]}</p>
+      <p class='font-semibold mb-2'>${product.price} €</p>
+      <button class='px-4 py-2 bg-amber-700 text-white rounded hover:bg-amber-800 transition-smooth'>${translations[currentLang].addBtn}</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.querySelector('button').addEventListener('click',()=>document.body.removeChild(modal));
+  modal.querySelector('button:nth-of-type(2)').addEventListener('click',()=>{addToCart(product.id);document.body.removeChild(modal);});
+}
+
+// Init
+switchLang('uk');
+renderCategories();
+renderSortOptions();
+renderProducts(getFilteredProducts());
+</script>
+
+</body>
+</html>
