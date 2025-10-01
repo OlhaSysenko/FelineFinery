@@ -8,23 +8,27 @@
   <style>
     .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.2); }
     .transition-smooth { transition: all 0.3s ease-in-out; }
-    .modal-bg { background-color: rgba(0,0,0,0.5); }
+    .modal-bg { background-color: rgba(0,0,0,0.7); }
     .messenger-icon { margin-left: 8px; cursor: pointer; transition: all 0.2s ease-in-out; }
     .messenger-icon:hover { transform: scale(1.2); }
     .telegram-icon { width: 28px; height: 28px; }
     .viber-icon { width: 32px; height: 32px; }
     .whatsapp-icon { width: 36px; height: 36px; }
-    .modal-image { max-width: 90vw; max-height: 80vh; object-fit: contain; margin: 0 auto; display: block; transform: rotate(0deg); }
-    .arrow-btn { position: absolute; top: 50%; transform: translateY(-50%); font-size: 2rem; color: #fff; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 50%; cursor: pointer; user-select: none; }
+    /* Модальне фото */
+    #imageModal { display: none; position: fixed; inset: 0; justify-content: center; align-items: center; z-index: 50; }
+    #imageModal.active { display: flex; }
+    .modal-image { max-width: 90vw; max-height: 80vh; object-fit: contain; cursor: pointer; transition: transform 0.3s ease-in-out; }
+    .arrow-btn { position: fixed; top: 50%; transform: translateY(-50%); font-size: 2.5rem; color: #fff; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 50%; cursor: pointer; user-select: none; z-index: 60; }
     .arrow-left { left: 10px; }
     .arrow-right { right: 10px; }
-    .close-btn { position: absolute; top: 10px; right: 10px; font-size: 2rem; color: #fff; cursor: pointer; background: rgba(0,0,0,0.3); border-radius: 50%; padding: 0 0.3rem; }
-    .dots-container { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: background 0.2s; }
-    .dot.active { background: #fff; }
-    .rotate-btn { position: absolute; bottom: 50px; font-size: 1.5rem; color: #fff; background: rgba(0,0,0,0.3); padding: 0.3rem 0.6rem; border-radius: 6px; cursor: pointer; user-select: none; }
+    .rotate-btn { position: fixed; bottom: 60px; font-size: 2rem; color: #fff; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 50%; cursor: pointer; user-select: none; z-index: 60; }
     .rotate-left { left: 10px; }
     .rotate-right { right: 10px; }
+    .close-btn { position: fixed; top: 10px; right: 10px; font-size: 2.5rem; color: #fff; cursor: pointer; background: rgba(0,0,0,0.3); border-radius: 50%; padding: 0 0.3rem; z-index: 60; }
+    .dots-container { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 60; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: background 0.2s; }
+    .dot.active { background: #fff; }
+    body.modal-open { overflow: hidden; }
   </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -34,7 +38,7 @@
   <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
     <div class="text-5xl font-bold text-amber-800 self-center flex items-center">
       <span class="mr-2 inline-block">🐾</span>
-      FelineFinery
+      <a href="#" id="homeLink">FelineFinery</a>
       <span class="ml-2 inline-block transform scale-x-[-1]">🐾</span>
     </div>
     <div class="flex flex-col items-end space-y-1">
@@ -133,17 +137,18 @@
 </div>
 
 <!-- Product Image Modal -->
-<div id="imageModal" class="fixed inset-0 modal-bg hidden justify-center items-center z-50 relative">
+<div id="imageModal" class="modal-bg">
   <span class="close-btn">&times;</span>
   <span class="arrow-btn arrow-left">&#8592;</span>
-  <span class="arrow-btn arrow-right">&#8594;</span>
   <img id="modalImg" class="modal-image" src="" alt="Product Image">
-  <div class="dots-container" id="dotsContainer"></div>
+  <span class="arrow-btn arrow-right">&#8594;</span>
   <span class="rotate-btn rotate-left">&#8634;</span>
   <span class="rotate-btn rotate-right">&#8635;</span>
+  <div class="dots-container" id="dotsContainer"></div>
 </div>
 
 <script>
+// --- Translations & Data ---
 const translations = {
   uk: {
     menu: { catalog: 'Каталог', about: 'Про нас', cart: 'Кошик' },
@@ -176,7 +181,6 @@ const translations = {
 };
 
 let currentLang = 'uk';
-let rotation = 0;
 
 const products = [
   { id: 1, title: { uk: "Сумка 'Kiev'", en: "Bag 'Kiev'" }, category: { uk: "Сумки", en: "Bags" }, price: 129, img: ["images/red_bag_3.jpg", "images/red_bag_2.jpg", "images/red_bag_1.jpg"], desc: { uk: "Елегантна шкіряна сумка, ручна робота, ідеальна для щоденного використання.", en: "Elegant leather bag, handmade, perfect for daily use." } },
@@ -190,9 +194,8 @@ const products = [
 
 let cart = [];
 let currentCategory = '';
-let currentImages = [];
-let currentIndex = 0;
 
+// --- Functions ---
 function switchLang(lang){
   currentLang = lang;
   document.getElementById('menuCatalog').textContent = translations[lang].menu.catalog;
@@ -254,7 +257,7 @@ function renderProducts(list){
   list.forEach(p=>{
     const card = document.createElement('div');
     card.className='border rounded p-2 bg-white flex flex-col product-card transition-smooth';
-
+    
     const img = document.createElement('img');
     img.src=p.img[0]; img.alt=p.title[currentLang];
     img.className='w-full h-48 object-cover rounded mb-2 cursor-pointer';
@@ -265,12 +268,12 @@ function renderProducts(list){
     title.textContent=p.title[currentLang];
 
     const category = document.createElement('div');
-    category.className='text-gray-600 mb-1';
+    category.className='text-gray-600 mb-2';
     category.textContent=p.category[currentLang];
 
     const desc = document.createElement('p');
     desc.className='text-gray-700 mb-2 text-sm';
-    desc.textContent=p.desc[currentLang];
+    desc.textContent = p.desc[currentLang];
 
     const footer = document.createElement('div');
     footer.className='flex justify-between items-center';
@@ -282,14 +285,12 @@ function renderProducts(list){
     addBtn.addEventListener('click',()=>addToCart(p.id));
     footer.appendChild(price); footer.appendChild(addBtn);
 
-    card.appendChild(img); card.appendChild(title); card.appendChild(category); 
-    card.appendChild(desc); card.appendChild(footer);
-
+    card.appendChild(img); card.appendChild(title); card.appendChild(category); card.appendChild(desc); card.appendChild(footer);
     grid.appendChild(card);
   });
 }
 
-// Cart
+// Cart functions
 function addToCart(id){
   const item = products.find(p=>p.id===id);
   const found = cart.find(c=>c.id===id);
@@ -327,24 +328,33 @@ function removeFromCart(id){
   document.getElementById('cartBtn').click();
 }
 
-// Product Image Modal
+// Product Image Modal functions
 const imageModal = document.getElementById('imageModal');
 const modalImg = document.getElementById('modalImg');
 const closeBtn = imageModal.querySelector('.close-btn');
 const leftArrow = imageModal.querySelector('.arrow-left');
 const rightArrow = imageModal.querySelector('.arrow-right');
-const dotsContainer = document.getElementById('dotsContainer');
 const rotateLeft = imageModal.querySelector('.rotate-left');
 const rotateRight = imageModal.querySelector('.rotate-right');
+const dotsContainer = document.getElementById('dotsContainer');
+let currentImages = [];
+let currentIndex = 0;
+let currentRotation = 0;
 
 function showImageModal(product){
   currentImages = product.img;
   currentIndex = 0;
-  rotation = 0;
-  modalImg.style.transform = 'rotate(0deg)';
+  currentRotation = 0;
   modalImg.src = currentImages[currentIndex];
-  imageModal.classList.remove('hidden');
+  modalImg.style.transform = `rotate(0deg)`;
+  imageModal.classList.add('active');
+  document.body.classList.add('modal-open');
   renderDots();
+}
+
+function closeImageModal(){
+  imageModal.classList.remove('active');
+  document.body.classList.remove('modal-open');
 }
 
 function renderDots(){
@@ -352,21 +362,26 @@ function renderDots(){
   currentImages.forEach((_,i)=>{
     const dot = document.createElement('span');
     dot.className='dot'+(i===currentIndex?' active':'');
-    dot.addEventListener('click',()=>{ currentIndex=i; updateModalImage(); });
+    dot.addEventListener('click',()=>{ currentIndex=i; currentRotation=0; updateModalImage(); });
     dotsContainer.appendChild(dot);
   });
 }
 
 function updateModalImage(){
   modalImg.src=currentImages[currentIndex];
-  modalImg.style.transform = `rotate(${rotation}deg)`;
+  modalImg.style.transform = `rotate(${currentRotation}deg)`;
   renderDots();
 }
 
 function changeImage(step){
   currentIndex = (currentIndex + step + currentImages.length) % currentImages.length;
-  rotation = 0;
+  currentRotation = 0;
   updateModalImage();
+}
+
+function rotateImage(step){
+  currentRotation += step;
+  modalImg.style.transform = `rotate(${currentRotation}deg)`;
 }
 
 // Swipe support
@@ -379,12 +394,14 @@ modalImg.addEventListener('touchend', e => {
   else if(touchStartX - touchEndX > 50) changeImage(1);
 });
 
-closeBtn.onclick = ()=>imageModal.classList.add('hidden');
+closeBtn.onclick = closeImageModal;
 leftArrow.onclick = ()=>changeImage(-1);
 rightArrow.onclick = ()=>changeImage(1);
-rotateLeft.onclick = ()=>{ rotation -= 90; updateModalImage(); };
-rotateRight.onclick = ()=>{ rotation += 90; updateModalImage(); };
-modalImg.onclick = ()=>window.open(currentImages[currentIndex],'_blank');
+rotateLeft.onclick = ()=>rotateImage(-90);
+rotateRight.onclick = ()=>rotateImage(90);
+
+// Home link
+document.getElementById('homeLink').onclick = ()=>{ window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
 // Init
 switchLang('uk');
