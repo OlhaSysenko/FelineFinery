@@ -14,6 +14,17 @@
     .telegram-icon { width: 28px; height: 28px; }
     .viber-icon { width: 32px; height: 32px; }
     .whatsapp-icon { width: 36px; height: 36px; }
+    .modal-image { max-width: 90vw; max-height: 80vh; object-fit: contain; margin: 0 auto; display: block; transform: rotate(0deg); }
+    .arrow-btn { position: absolute; top: 50%; transform: translateY(-50%); font-size: 2rem; color: #fff; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 50%; cursor: pointer; user-select: none; }
+    .arrow-left { left: 10px; }
+    .arrow-right { right: 10px; }
+    .close-btn { position: absolute; top: 10px; right: 10px; font-size: 2rem; color: #fff; cursor: pointer; background: rgba(0,0,0,0.3); border-radius: 50%; padding: 0 0.3rem; }
+    .dots-container { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: background 0.2s; }
+    .dot.active { background: #fff; }
+    .rotate-btn { position: absolute; bottom: 50px; font-size: 1.5rem; color: #fff; background: rgba(0,0,0,0.3); padding: 0.3rem 0.6rem; border-radius: 6px; cursor: pointer; user-select: none; }
+    .rotate-left { left: 10px; }
+    .rotate-right { right: 10px; }
   </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -21,16 +32,11 @@
 <!-- Header -->
 <header class="bg-amber-50 shadow-md sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
-
-    <!-- Назва по середині вертикалі -->
     <div class="text-5xl font-bold text-amber-800 self-center flex items-center">
       <span class="mr-2 inline-block">🐾</span>
       FelineFinery
       <span class="ml-2 inline-block transform scale-x-[-1]">🐾</span>
     </div>
-  
-
-    <!-- Контакти та меню справа -->
     <div class="flex flex-col items-end space-y-1">
       <div class="flex items-center space-x-2">
         <span>+380123456789</span>
@@ -44,21 +50,16 @@
           <img class="messenger-icon whatsapp-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
         </a>
       </div>
-
-      <!-- Меню -->
       <nav class="flex space-x-4">
         <a href="#catalog" id="menuCatalog" class="text-gray-700 hover:text-amber-700 font-bold text-2xl">Каталог</a>
         <a href="#about" id="menuAbout" class="text-gray-700 hover:text-amber-700 font-bold text-2xl">Про нас</a>
         <a href="#" id="cartBtn" class="text-gray-700 hover:text-amber-700 font-bold text-2xl">Кошик (<span id="cartCount">0</span>)</a>
       </nav>
-
-      <!-- Мова -->
       <div class="mt-1">
         <button onclick="switchLang('uk')" class="px-2 py-1 border rounded">UA</button>
         <button onclick="switchLang('en')" class="px-2 py-1 border rounded">EN</button>
       </div>
     </div>
-
   </div>
 </header>
 
@@ -131,6 +132,17 @@
   </div>
 </div>
 
+<!-- Product Image Modal -->
+<div id="imageModal" class="fixed inset-0 modal-bg hidden justify-center items-center z-50 relative">
+  <span class="close-btn">&times;</span>
+  <span class="arrow-btn arrow-left">&#8592;</span>
+  <span class="arrow-btn arrow-right">&#8594;</span>
+  <img id="modalImg" class="modal-image" src="" alt="Product Image">
+  <div class="dots-container" id="dotsContainer"></div>
+  <span class="rotate-btn rotate-left">&#8634;</span>
+  <span class="rotate-btn rotate-right">&#8635;</span>
+</div>
+
 <script>
 const translations = {
   uk: {
@@ -164,16 +176,22 @@ const translations = {
 };
 
 let currentLang = 'uk';
+let rotation = 0;
 
 const products = [
-  {id:1,title:{uk:"Сумка 'Kiev'",en:"Bag 'Kiev'"},category:{uk:"Сумки",en:"Bags"},price:129,img:["https://images.unsplash.com/photo-1606813909396-3dfc6783e6a7?auto=format&fit=crop&w=400&q=80"],desc:{uk:"Елегантна шкіряна сумка, ручна робота, ідеальна для щоденного використання.",en:"Elegant leather bag, handmade, perfect for daily use."}},
-  {id:2,title:{uk:"Рюкзак 'Traveler'",en:"Backpack 'Traveler'"},category:{uk:"Рюкзаки",en:"Backpacks"},price:179,img:["https://images.unsplash.com/photo-1560807707-8cc77767d783?auto=format&fit=crop&w=400&q=80"],desc:{uk:"Міцний рюкзак з натуральної шкіри для подорожей та щоденних пригод.",en:"Durable leather backpack for travel and daily adventures."}},
-  {id:3,title:{uk:"Гаманець 'Classic'",en:"Wallet 'Classic'"},category:{uk:"Гаманці",en:"Wallets"},price:49,img:["https://images.unsplash.com/photo-1593032457863-6f95d3c1b267?auto=format&fit=crop&w=400&q=80"],desc:{uk:"Компактний гаманець для зберігання карток та готівки.",en:"Compact wallet for cards and cash."}},
-  {id:4,title:{uk:"Ремінь 'Heritage'",en:"Belt 'Heritage'"},category:{uk:"Ремені",en:"Belts"},price:39,img:["https://images.unsplash.com/photo-1588694894517-c6de28e3e6cf?auto=format&fit=crop&w=400&q=80"],desc:{uk:"Стильний ремінь з натуральної шкіри, підходить до будь-якого образу.",en:"Stylish leather belt suitable for any outfit."}}
+  { id: 1, title: { uk: "Сумка 'Kiev'", en: "Bag 'Kiev'" }, category: { uk: "Сумки", en: "Bags" }, price: 129, img: ["images/red_bag_3.jpg", "images/red_bag_2.jpg", "images/red_bag_1.jpg"], desc: { uk: "Елегантна шкіряна сумка, ручна робота, ідеальна для щоденного використання.", en: "Elegant leather bag, handmade, perfect for daily use." } },
+  { id: 2, title: { uk: "Сумка 'Kiev'", en: "Bag 'Kiev'" }, category: { uk: "Сумки", en: "Bags" }, price: 129, img: ["images/black_bag_1.jpg", "images/black_bag_2.jpg"], desc: { uk: "Елегантна шкіряна сумка, ручна робота, ідеальна для щоденного використання.", en: "Elegant leather bag, handmade, perfect for daily use." } },
+  { id: 3, title: { uk: "Аксесуари 'Kiev'", en: "Accessories 'Kiev'" }, category: { uk: "Аксесуари", en: "Accessories" }, price: 129, img: ["images/Acs_1.jpg"], desc: { uk: "Елегантна прикраса, ручна робота, ідеальна як для щоденного використання, так і для святкових подій.", en: "Elegant decoration, handmade, perfect for both everyday use and festive events" } },
+  { id: 4, title: { uk: "Аксесуари 'Kiev'", en: "Accessories 'Kiev'" }, category: { uk: "Аксесуари", en: "Accessories" }, price: 129, img: ["images/acs_2.jpg"], desc: { uk: "Елегантна прикраса, ручна робота, ідеальна як для щоденного використання, так і для святкових подій.", en: "Elegant decoration, handmade, perfect for both everyday use and festive events" } },
+  { id: 5, title: { uk: "Рюкзак 'Traveler'", en: "Backpack 'Traveler'" }, category: { uk: "Рюкзаки", en: "Backpacks" }, price: 179, img: ["images/bagpack.jpg"], desc: { uk: "Міцний рюкзак з натуральної шкіри для подорожей та щоденних пригод.", en: "Durable leather backpack for travel and daily adventures." } },
+  { id: 6, title: { uk: "Гаманець 'Classic'", en: "Wallet 'Classic'" }, category: { uk: "Гаманці", en: "Wallets" }, price: 49, img: ["images/A_wallet_1.jpg", "images/A_wallet_2.jpg"], desc: { uk: "Компактний гаманець для зберігання карток та готівки.", en: "Compact wallet for cards and cash." } },
+  { id: 7, title: { uk: "Ремінь 'Heritage'", en: "Belt 'Heritage'" }, category: { uk: "Ремені", en: "Belts" }, price: 39, img: ["images/rem_1.jpg"], desc: { uk: "Стильний ремінь з натуральної шкіри, підходить до будь-якого образу.", en: "Stylish leather belt suitable for any outfit." } }
 ];
 
 let cart = [];
 let currentCategory = '';
+let currentImages = [];
+let currentIndex = 0;
 
 function switchLang(lang){
   currentLang = lang;
@@ -195,7 +213,6 @@ function switchLang(lang){
   renderProducts(getFilteredProducts());
 }
 
-// Categories
 function renderCategories(){
   const container = document.getElementById('categoryButtons');
   container.innerHTML='';
@@ -208,7 +225,6 @@ function renderCategories(){
   });
 }
 
-// Sorting
 function renderSortOptions(){
   const select = document.getElementById('sortSelect');
   select.innerHTML='';
@@ -222,7 +238,6 @@ function renderSortOptions(){
 
 function applySorting(){ renderProducts(getFilteredProducts()); }
 
-// Products
 function getFilteredProducts(){
   let list = currentCategory ? products.filter(p=>p.category[currentLang]===currentCategory) : [...products];
   const sort = document.getElementById('sortSelect').value;
@@ -239,18 +254,23 @@ function renderProducts(list){
   list.forEach(p=>{
     const card = document.createElement('div');
     card.className='border rounded p-2 bg-white flex flex-col product-card transition-smooth';
+
     const img = document.createElement('img');
     img.src=p.img[0]; img.alt=p.title[currentLang];
     img.className='w-full h-48 object-cover rounded mb-2 cursor-pointer';
-    img.addEventListener('click',()=>showProductModal(p.id));
+    img.addEventListener('click',()=>showImageModal(p));
 
     const title = document.createElement('h3');
     title.className='font-medium mb-1 text-amber-800';
     title.textContent=p.title[currentLang];
 
     const category = document.createElement('div');
-    category.className='text-gray-600 mb-2';
+    category.className='text-gray-600 mb-1';
     category.textContent=p.category[currentLang];
+
+    const desc = document.createElement('p');
+    desc.className='text-gray-700 mb-2 text-sm';
+    desc.textContent=p.desc[currentLang];
 
     const footer = document.createElement('div');
     footer.className='flex justify-between items-center';
@@ -262,7 +282,9 @@ function renderProducts(list){
     addBtn.addEventListener('click',()=>addToCart(p.id));
     footer.appendChild(price); footer.appendChild(addBtn);
 
-    card.appendChild(img); card.appendChild(title); card.appendChild(category); card.appendChild(footer);
+    card.appendChild(img); card.appendChild(title); card.appendChild(category); 
+    card.appendChild(desc); card.appendChild(footer);
+
     grid.appendChild(card);
   });
 }
@@ -274,6 +296,7 @@ function addToCart(id){
   if(found) found.qty++; else cart.push({...item,qty:1});
   updateCartCount();
 }
+
 function updateCartCount(){
   document.getElementById('cartCount').textContent=cart.reduce((sum,i)=>sum+i.qty,0);
 }
@@ -296,37 +319,72 @@ document.getElementById('cartBtn').addEventListener('click',()=>{
   document.getElementById('cartTotal').textContent=cart.reduce((sum,i)=>sum+i.price*i.qty,0)+' €';
   cartModal.classList.remove('hidden');
 });
-
 document.getElementById('closeCartBtn').addEventListener('click',()=>cartModal.classList.add('hidden'));
 document.getElementById('checkoutBtn').addEventListener('click',()=>alert(translations[currentLang].checkoutBtn+' functionality will be implemented later'));
-
 function removeFromCart(id){
   cart=cart.filter(c=>c.id!==id);
   updateCartCount();
   document.getElementById('cartBtn').click();
 }
 
-// Product modal
-function showProductModal(id){
-  const product = products.find(p=>p.id===id);
-  const modal = document.createElement('div');
-  modal.className='fixed inset-0 modal-bg flex justify-center items-center z-50';
-  modal.innerHTML=`
-    <div class='bg-white max-w-lg w-full p-6 rounded-lg relative'>
-      <button class='absolute top-2 right-2 text-red-600 text-xl font-bold'>&times;</button>
-      <h3 class='text-xl font-semibold mb-4 text-amber-800'>${product.title[currentLang]}</h3>
-      <div class='grid grid-cols-2 gap-2 mb-4'>
-        ${product.img.map(i=>`<img src='${i}' class='w-full h-32 object-cover rounded'>`).join('')}
-      </div>
-      <p class='text-gray-700 mb-2'>${product.desc[currentLang]}</p>
-      <p class='font-semibold mb-2'>${product.price} €</p>
-      <button class='px-4 py-2 bg-amber-700 text-white rounded hover:bg-amber-800 transition-smooth'>${translations[currentLang].addBtn}</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  modal.querySelector('button').addEventListener('click',()=>document.body.removeChild(modal));
-  modal.querySelector('button:nth-of-type(2)').addEventListener('click',()=>{addToCart(product.id);document.body.removeChild(modal);});
+// Product Image Modal
+const imageModal = document.getElementById('imageModal');
+const modalImg = document.getElementById('modalImg');
+const closeBtn = imageModal.querySelector('.close-btn');
+const leftArrow = imageModal.querySelector('.arrow-left');
+const rightArrow = imageModal.querySelector('.arrow-right');
+const dotsContainer = document.getElementById('dotsContainer');
+const rotateLeft = imageModal.querySelector('.rotate-left');
+const rotateRight = imageModal.querySelector('.rotate-right');
+
+function showImageModal(product){
+  currentImages = product.img;
+  currentIndex = 0;
+  rotation = 0;
+  modalImg.style.transform = 'rotate(0deg)';
+  modalImg.src = currentImages[currentIndex];
+  imageModal.classList.remove('hidden');
+  renderDots();
 }
+
+function renderDots(){
+  dotsContainer.innerHTML='';
+  currentImages.forEach((_,i)=>{
+    const dot = document.createElement('span');
+    dot.className='dot'+(i===currentIndex?' active':'');
+    dot.addEventListener('click',()=>{ currentIndex=i; updateModalImage(); });
+    dotsContainer.appendChild(dot);
+  });
+}
+
+function updateModalImage(){
+  modalImg.src=currentImages[currentIndex];
+  modalImg.style.transform = `rotate(${rotation}deg)`;
+  renderDots();
+}
+
+function changeImage(step){
+  currentIndex = (currentIndex + step + currentImages.length) % currentImages.length;
+  rotation = 0;
+  updateModalImage();
+}
+
+// Swipe support
+let touchStartX = 0;
+let touchEndX = 0;
+modalImg.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+modalImg.addEventListener('touchend', e => {
+  touchEndX = e.changedTouches[0].screenX;
+  if(touchEndX - touchStartX > 50) changeImage(-1);
+  else if(touchStartX - touchEndX > 50) changeImage(1);
+});
+
+closeBtn.onclick = ()=>imageModal.classList.add('hidden');
+leftArrow.onclick = ()=>changeImage(-1);
+rightArrow.onclick = ()=>changeImage(1);
+rotateLeft.onclick = ()=>{ rotation -= 90; updateModalImage(); };
+rotateRight.onclick = ()=>{ rotation += 90; updateModalImage(); };
+modalImg.onclick = ()=>window.open(currentImages[currentIndex],'_blank');
 
 // Init
 switchLang('uk');
